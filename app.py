@@ -63,9 +63,9 @@ def upload():
 
             # Data Frame untuk Prediksi Kelulusan
             result_df = pd.DataFrame({
-                'Pilihan 1': ['Lulus' if prob >= 1 else 'Tidak Lulus' for prob in probabilities[:, 1]],
-                'Pilihan 2': ['Lulus' if prob >= 1 else 'Tidak Lulus' for prob in probabilities[:, 1]],
-                'Pilihan 3': ['Lulus' if prob >= 1 else 'Tidak Lulus' for prob in probabilities[:, 1]]
+                'Pilihan 1': ['Lulus' if prob >= 0.7 else 'Tidak Lulus' for prob in probabilities[:, 1]],
+                'Pilihan 2': ['Lulus' if prob >=  0.7 else 'Tidak Lulus' for prob in probabilities[:, 1]],
+                'Pilihan 3': ['Lulus' if prob >=  0.7 else 'Tidak Lulus' for prob in probabilities[:, 1]]
             })
 
             return render_template('result.html', result=result_df.to_html(index=False))
