@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <title>Sistem Rekomendasi PMDK</title>
+  <style>
+    body {
+      background-color: #3366CC;
+      font-family: Arial, sans-serif;
+    }
+
+    .custom-form {
+      margin-top: 50px;
+    }
+
+    .custom-border {
+      border: 2px solid #007bff;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: #fff;
+      box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-container {
+      display: none;
+    }
+
+    .btn {
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .logo {
+      width: 100px;
+      vertical-align: middle;
+    }
+
+    .title {
+      font-size: 24px;
+      color: #070a0c;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .upload-label {
+      font-size: 18px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-10 custom-form">
+        <div class="custom-border">
+          <div class="text-center mb-4">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+            <h2 class="title d-inline ml-2 text"><u>Rekomendasi Calon Mahasiswa Jalur PMDK</u></h2>
+          </div>
+          <center>
+            <form action="/upload" method="post" enctype="multipart/form-data" id="myForm">
+
+              <label for="file" class="upload-label">Silahkan Upload Data Calon Mahasiswa</label><br><br>
+              <input class="text-success" type="file" id="file" name="file" accept=".xls, .xlsx , .csv" required>
+              <div class="progress-container">
+                <div class="progress">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                    aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+                </div>
+              </div>
+              <br><br>
+              <center> <button type="button" class="btn btn-danger" onclick="resetForm()">Cancel</button>
+                <button type="submit" class="btn btn-primary" onclick="processData()">Proses Data</button></center>
+            </form>
+          </center>
+          <div id="error-message" style="color: red; display: none;">Mohon pilih file untuk diunggah.</div>
+          <div id="success-message" style="color: green; display: none;">Proses data berhasil.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <script>
+    function resetForm() {
+      document.getElementById("myForm").reset();
+    }
+
+    function processData() {
+      var fileInput = document.getElementById("file");
+      if (!fileInput.value) {
+        document.getElementById("error-message").style.display = "block";
+        return false;
+      } else {
+        document.getElementById("error-message").style.display = "none";
+      }
+      var progressBar = document.querySelector('.progress-bar');
+      var progressContainer = document.querySelector('.progress-container');
+      progressContainer.style.display = 'block';
+
+      var width = 1;
+      var interval = setInterval(function () {
+        if (width >= 100) {
+          clearInterval(interval);
+          document.getElementById("success-message").style.display = "block";
+        } else {
+          width++;
+          progressBar.style.width = width + '%';
+        }
+      }, 50);
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasil Rekomendasi</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        .container {
+            margin-top: 50px;
+        }
+
+        .table-responsive {
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            margin-bottom: 1rem;
+            color: #212529;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            vertical-align: top;
+            border-top: 1px solid #dee2e6;
+        }
+
+        th {
+            vertical-align: bottom;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        tbody tr:nth-of-type(even) {
+            background-color: #f2f2f2;
+        }
+
+        tbody tr:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="my-4"><center id="tahun">Hasil Rekomendasi PMDK Calon Mahasiswa Tahun </center></h2>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="thead-dark">
+                    
+                </thead>
+                <tbody>
+                    {{ result|safe }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+<script>
+    // Dapatkan tahun saat ini
+    var tahunSaatIni = new Date().getFullYear();
+    
+    // Dapatkan elemen dengan ID "tahun"
+    var elemenTahun = document.getElementById("tahun");
+    
+    // Setel teks di dalam elemen menjadi "Hasil Rekomendasi Calon Mahasiswa Tahun [tahun]"
+    elemenTahun.innerText = "Hasil Rekomendasi Calon Mahasiswa Tahun " + tahunSaatIni;
+  </script>
+</html>
