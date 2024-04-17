@@ -4,65 +4,186 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hasil Rekomendasi</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">  
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    
     <style>
         .container {
             margin-top: 50px;
         }
 
-        .table-responsive {
-            margin-top: 20px;
-        }
-
         table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
             width: 100%;
-            margin-bottom: 1rem;
-            color: #212529;
         }
 
-        th, td {
-            padding: 0.75rem;
-            vertical-align: top;
-            border-top: 1px solid #dee2e6;
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
         }
 
-        th {
-            vertical-align: bottom;
-            border-bottom: 2px solid #dee2e6;
+        tr:nth-child(even) {
+            background-color: #dddddd;
         }
 
-        tbody tr:nth-of-type(even) {
-            background-color: #f2f2f2;
+        .pagination {
+            margin-top: 20px;
+            float: right;
+        }
+        .pagination button {
+            margin: 0 5px;
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        .pagination button:hover {
+            background-color: #0056b3;
         }
 
-        tbody tr:hover {
-            background-color: #ddd;
+        /* Tambahan untuk tombol unduh PDF */
+        #btnDownloadPDF {
+            margin-top: 20px;
+            margin-left: 86%;
+        }
+        #btnback {
+            margin-top: 20px;
+            box-sizing: border-box;
+            width: 98px;
+            height: 32px;
+            left: 152px;
+            top: 811px;
+            background: #FFFFFF;
+            border: 1px solid #4759FF;
+            border-radius: 4px;   
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2 class="my-4"><center id="tahun">Hasil Rekomendasi PMDK Calon Mahasiswa Tahun </center></h2>
+        <h2 class="my-4"><center id="tahun"> </center></h2>
+        <button id="btnDownloadPDF" class="btn btn-primary"><i class="fa fa-download" style="font-size: 20px;"></i>Download</button>
         <div class="table-responsive">
             <table class="table table-bordered table-hover">
-                <thead class="thead-dark">
-                    
-                </thead>
                 <tbody>
                     {{ result|safe }}
                 </tbody>
             </table>
         </div>
+        <div class="pagination"></div>
+        <button id="btnback">Back</button>      
     </div>
 </body>
 <script>
     // Dapatkan tahun saat ini
     var tahunSaatIni = new Date().getFullYear();
-    
+
     // Dapatkan elemen dengan ID "tahun"
     var elemenTahun = document.getElementById("tahun");
-    
-    // Setel teks di dalam elemen menjadi "Hasil Rekomendasi Calon Mahasiswa Tahun [tahun]"
     elemenTahun.innerText = "Hasil Rekomendasi Calon Mahasiswa Tahun " + tahunSaatIni;
-  </script>
+
+    document.addEventListener("DOMContentLoaded", function() {
+        var rows = document.querySelectorAll("tbody tr");
+        var rowsPerPage = 10;
+        var pageCount = Math.ceil(rows.length / rowsPerPage);
+
+        // Sembunyikan semua baris kecuali yang pertama
+        function hideRows() {
+            for (var i = 0; i < rows.length; i++) {
+                if (i >= rowsPerPage) {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+        hideRows();
+
+        // Buat tombol navigasi
+        var pagination = document.querySelector(".pagination");
+
+        // Tombol Previous
+        var prevButton = document.createElement("button");
+        prevButton.innerText = "< Previous";
+        prevButton.classList.add("btn", "btn-primary");
+        prevButton.addEventListener("click", function() {
+            var currentPage = parseInt(document.querySelector(".pagination .active").innerText);
+            if (currentPage > 1) {
+                showPage(currentPage - 1);
+            }
+        });
+        pagination.appendChild(prevButton);
+
+        // Tombol halaman
+        for (var i = 1; i <= pageCount; i++) {
+            var button = document.createElement("button");
+            button.innerText = i;
+            button.classList.add("btn", "btn-primary");
+            button.addEventListener("click", function() {
+                var pageNumber = parseInt(this.innerText);
+                showPage(pageNumber);
+            });
+            pagination.appendChild(button);
+        }
+
+        // Tombol Next
+        var nextButton = document.createElement("button");
+        nextButton.innerText = "Next >";
+        nextButton.classList.add("btn", "btn-primary");
+        nextButton.addEventListener("click", function() {
+            var currentPage = parseInt(document.querySelector(".pagination .active").innerText);
+            if (currentPage < pageCount) {
+                showPage(currentPage + 1);
+            }
+        });
+        pagination.appendChild(nextButton);
+
+        // Fungsi untuk menampilkan halaman tertentu
+        function showPage(pageNumber) {
+            var start = (pageNumber - 1) * rowsPerPage;
+            var end = start + rowsPerPage;
+            for (var j = 0; j < rows.length; j++) {
+                if (j >= start && j < end) {
+                    rows[j].style.display = "table-row";
+                } else {
+                    rows[j].style.display = "none";
+                }
+            }
+            // Hapus kelas "active" dari tombol sebelumnya dan tambahkan ke tombol yang sesuai dengan halaman saat ini
+            var buttons = document.querySelectorAll(".pagination button");
+            buttons.forEach(function(btn) {
+                btn.classList.remove("active");
+            });
+            buttons[pageNumber].classList.add("active");
+        }
+
+        // Tampilkan halaman pertama
+        showPage(1);
+
+        // Fungsi untuk mengunduh halaman sebagai file PDF
+        document.getElementById("btnDownloadPDF").addEventListener("click", function() {
+            var htmlContent = document.documentElement.outerHTML; // Ambil konten HTML dari halaman
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/download_pdf", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.responseType = "blob";
+
+            xhr.onload = function(event) {
+                if (this.status == 200) {
+                    var blob = new Blob([this.response], { type: "pdf" });
+                    var link = document.createElement("a");
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = "Hasil Rekomendasi.pdf";
+                    link.click();
+                }
+            };
+
+            xhr.send(JSON.stringify({ html_content: htmlContent }));
+        });
+    });
+    document.getElementById("btnback").addEventListener("click", function() {
+        window.location.href = "/"; 
+    });
+</script>
 </html>

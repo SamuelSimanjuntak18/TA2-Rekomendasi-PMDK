@@ -5,10 +5,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">  
   <title>Sistem Rekomendasi PMDK</title>
   <style>
     body {
-      background-color: #3366CC;
+      background-color: #f1f1f1;
       font-family: Arial, sans-serif;
     }
 
@@ -37,8 +38,10 @@
     }
 
     .logo {
-      width: 100px;
-      vertical-align: middle;
+    width: 79px;
+    height: 82px;
+    left: 100px;
+    top: 145px;
     }
 
     .title {
@@ -49,13 +52,55 @@
     }
 
     .upload-label {
-      font-size: 18px;
+      font-size: 13px;
+      font-style: italic;
+      color: #4d3e3e;
     }
+
+    /* Style untuk drag and drop */
+    #drop_zone {
+      border: 2px dashed #007bff;
+      width: 100%;
+      height: 170px;
+      text-align: center;
+      padding: 40px 0;
+      margin-bottom: 20px;
+    }
+
+    #drop_zone.hover {
+      background-color: #f1f1f1;
+    }
+    #proses {
+  width: 525px;
+  height: 45px;
+  left: 457px;
+  top: 422px;
+  background: #0479C0;
+  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.25);
+  border-radius: 6px;
+  color:#fff;
+    }
+    #cancel {
+    width: 139px;
+    height: 45px;
+    left: 650px;
+    top: 489px;
+
+    }
+    #choose {
+    background: #0479C0;
+    width: 139px;
+    height: 30px;
+    left: 643px;
+    top: 313px;
+    color:#fff;
+
+
+    }
+    
+   
   </style>
-</head> 
-
-
-
+</head>
 
 <body>
   <div class="container">
@@ -64,13 +109,18 @@
         <div class="custom-border">
           <div class="text-center mb-4">
             <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
-            <h2 class="title d-inline ml-2 text"><u>Rekomendasi Calon Mahasiswa Jalur PMDK</u></h2>
+            <h2 class="title d-inline ml-2 text">Rekomendasi Calon Mahasiswa Jalur PMDK</h2>
           </div>
           <center>
             <form action="/upload" method="post" enctype="multipart/form-data" id="myForm">
-
-              <label for="file" class="upload-label">Silahkan Upload Data Calon Mahasiswa</label><br><br>
-              <input class="text-success" type="file" id="file" name="file" accept=".xls, .xlsx , .csv" required>
+              <div id="drop_zone" ondrop="handleDrop(event)" ondragover="handleDragOver(event)">
+                <i class="fa fa-cloud-upload" style="font-size: 25px;"></i>
+                <!-- <i class="fa fa-cloud-upload" aria-hidden="true" style="color: #007bff; font-size: 60px;"></i> -->
+                <p class="upload-label">Drag and drop file here, or</p>
+                <input type="file" id="file" name="file" accept=".xls, .xlsx , .csv" style="display: none;" required>
+                <label for="file" id="choose">Choose File</label>
+              </div>
+              <div id="error-message" style="color: red; display: none; text-align: left;"><i>Tidak ada file yang dipilih, Silahkan Pilih file</i></div>
               <div class="progress-container">
                 <div class="progress">
                   <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
@@ -78,12 +128,15 @@
                 </div>
               </div>
               <br><br>
-              <center> <button type="button" class="btn btn-danger" onclick="resetForm()">Cancel</button>
-                <button type="submit" class="btn btn-primary" onclick="processData()">Proses Data</button></center>
-            </form>
+              <center>
+                <button type="submit" id="proses"  onclick="processData()">Proses Data</button></center>
+            <br>
+            <button type="button" id="cancel" onclick="resetForm()">Cancel</button>
+              </form>
           </center>
-          <div id="error-message" style="color: red; display: none;">Mohon bantuannya saya jomblo pilih file untuk diunggah.</div>
+        
           <div id="success-message" style="color: green; display: none;">Proses data berhasil.</div>
+          <div id="file-name" style="color: #007bff; display: none;"></div>
         </div>
       </div>
     </div>
@@ -94,6 +147,7 @@
   <script>
     function resetForm() {
       document.getElementById("myForm").reset();
+      document.getElementById("file-name").style.display = "none";
     }
 
     function processData() {
@@ -119,6 +173,32 @@
         }
       }, 50);
     }
+
+    function handleDragOver(event) {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'copy';
+      var dropZone = document.getElementById('drop_zone');
+      dropZone.classList.add('hover');
+    }
+
+    function handleDrop(event) {
+      event.preventDefault();
+      var fileInput = document.getElementById('file');
+      fileInput.files = event.dataTransfer.files;
+      var dropZone = document.getElementById('drop_zone');
+      dropZone.classList.remove('hover');
+
+      var fileName = event.dataTransfer.files[0].name;
+      document.getElementById("file-name").innerText = "" + fileName;
+      document.getElementById("file-name").style.display = "block";
+    }
+
+    // Function untuk menampilkan nama file saat dipilih menggunakan tombol "Choose File"
+    document.getElementById("file").addEventListener("change", function() {
+      var fileName = this.files[0].name;
+      document.getElementById("file-name").innerText = " " + fileName;
+      document.getElementById("file-name").style.display = "block";
+    });
   </script>
 </body>
 

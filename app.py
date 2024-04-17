@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, jsonify
 from werkzeug.utils import secure_filename
 import pandas as pd
 import joblib
 from openpyxl import load_workbook
+import pdfkit
 
 app = Flask(__name__)
 
@@ -20,6 +21,17 @@ mapping_prodi = {
     'S1 Teknik Bioproses': 7,
     'S1 Teknik Elektro': 8
 }
+
+# Fungsi konversi HTML ke PDF
+def html_to_pdf(html_content, output_path):
+    options = {
+        'page-size': 'Letter',
+        'margin-top': '0.75in',
+        'margin-right': '0.75in',
+        'margin-bottom': '0.75in',
+        'margin-left': '0.75in',
+    }
+    pdfkit.from_string(html_content, output_path, options=options)
 
 # Halaman awal
 @app.route('/')
@@ -84,7 +96,7 @@ def upload():
             })
             
             if not show_nama:
-                result_df = result_df.drop(columns=['Nama'])  # Drop kolom 'Nama' jika tidak ada
+                result_df = result_df.drop(columns=['Nama'])  
 
             return render_template('result.html', result=result_df.to_html(index=False))
 
@@ -96,5 +108,29 @@ def upload():
 def result():
     return render_template('result.html')
 
+# Fungsi untuk mengunduh PDF
+@app.route('/download_pdf', methods=['POST'])
+def download_pdf():
+    try:
+        # Periksa apakah ada file HTML yang dikirimkan dalam permintaan POST
+        if 'html_content' not in request.form:
+            raise ValueError("HTML content not found in the request")
+
+        html_content = request.form['html_content']  # Ambil konten HTML dari formulir
+        pdf_filename = 'Hasil Rekomendasi.pdf'  # Nama file PDF yang akan diunduh
+        pdf_path = 'static/' + pdf_filename  # Path untuk menyimpan file PDF
+
+        html_to_pdf(html_content, pdf_path)  # Konversi HTML ke PDF
+        return jsonify({'success': True, 'pdf_filename': pdf_filename})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
+# Rute untuk mengunduh file PDF
+@app.route('/download/<path:filename>', methods=['GET'])
+def download(filename):
+    directory = 'static'
+    return send_from_directory(directory, filename, as_attachment=True)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False,host="0.0.0.0")
