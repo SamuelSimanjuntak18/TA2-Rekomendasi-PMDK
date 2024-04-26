@@ -4,12 +4,10 @@ import pandas as pd
 import joblib
 from openpyxl import load_workbook
 import pdfkit
-
 app = Flask(__name__)
 
 # Import model yang sudah di TRAINING
 model = joblib.load('D:\\SEMESTER7&8\\TA1\\Referensi\\TRIAL\\TA2-Rekomendasi-PMDK\\Model\\ModelTA.pkl')
-
 # Mapping jurusan
 mapping_prodi = {
     'DIII Teknologi Informasi': 1,
@@ -21,7 +19,6 @@ mapping_prodi = {
     'S1 Teknik Bioproses': 7,
     'S1 Teknik Elektro': 8
 }
-
 # Fungsi konversi HTML ke PDF
 def html_to_pdf(html_content, output_path):
     options = {
@@ -66,7 +63,7 @@ def upload():
                 data_df = pd.read_csv(filename)
 
             else:
-                raise ValueError("File must be in Excel (.xlsx) or CSV (.csv) format")
+                raise ValueError("File harus memiliki ekstensi (.xlsx) atau CSV (.csv) ")
 
             # Tambahkan kolom "Nama" dengan nilai default kosong jika tidak ada
             if 'Nama' not in data_df.columns:
@@ -81,7 +78,6 @@ def upload():
 
             # Ambil Mapping Jurusan
             data_df[['Pilihan 1', 'Pilihan 2', 'Pilihan 3']] = data_df[['Pilihan 1', 'Pilihan 2', 'Pilihan 3']].replace(mapping_prodi)
-
             # Buat Prediksi
             predictions = model.predict(data_df.drop(columns=['Nama', 'Nomor']))  # Drop kolom 'Nama' dan 'Nomor' sebelum membuat prediksi
             probabilities = model.predict_proba(data_df.drop(columns=['Nama', 'Nomor']))
@@ -90,10 +86,13 @@ def upload():
             result_df = pd.DataFrame({
                 'Nomor': data_df['Nomor'],
                 'Nama': data_df['Nama'] if 'Nama' in data_df.columns else None,  # Sertakan kolom "Nama" jika ada
-                'Pilihan 1': ['Lulus' if prob >= 0.7 else 'Tidak Lulus' for prob in probabilities[:, 1]],
-                'Pilihan 2': ['Lulus' if prob >= 0.7 else 'Tidak Lulus' for prob in probabilities[:, 1]],
-                'Pilihan 3': ['Lulus' if prob >= 0.7 else 'Tidak Lulus' for prob in probabilities[:, 1]]
-            })
+                'Pilihan 1': [f"Lulus" if pred == 1 else f"Tidak Lulus" for pred, prob in zip(predictions, probabilities[:, 1])],
+                'Pilihan 2': [f"Lulus" if pred == 1 else f"Tidak Lulus" for pred, prob in zip(predictions, probabilities[:, 1])],
+                'Pilihan 3': [f"Lulus " if pred == 1 else f"Tidak Lulus" for pred, prob in zip(predictions, probabilities[:, 1])]
+        })
+                #  'Pilihan 1': [f"Lulus (Prob: {prob:.10f})" if pred == 1 else f"Tidak Lulus (Prob: {prob:.10f})" for pred, prob in zip(predictions, probabilities[:, 1])],
+                # 'Pilihan 2': [f"Lulus (Prob: {prob:.10f})" if pred == 1 else f"Tidak Lulus (Prob: {prob:.10f})" for pred, prob in zip(predictions, probabilities[:, 1])],
+                # 'Pilihan 3': [f"Lulus (Prob: {prob:.10f})" if pred == 1 else f"Tidak Lulus (Prob: {prob:.10f})" for pred, prob in zip(predictions, probabilities[:, 1])]       
             
             if not show_nama:
                 result_df = result_df.drop(columns=['Nama'])  
@@ -117,7 +116,7 @@ def download_pdf():
             raise ValueError("HTML content not found in the request")
 
         html_content = request.form['html_content']  # Ambil konten HTML dari formulir
-        pdf_filename = 'Hasil Rekomendasi.pdf'  # Nama file PDF yang akan diunduh
+        pdf_filename = 'Hasil_Rekomendasi.pdf'  # Nama file PDF yang akan diunduh
         pdf_path = 'static/' + pdf_filename  # Path untuk menyimpan file PDF
 
         html_to_pdf(html_content, pdf_path)  # Konversi HTML ke PDF
@@ -133,4 +132,4 @@ def download(filename):
     return send_from_directory(directory, filename, as_attachment=True)
 
 if __name__ == '__main__':
-    app.run(debug=False,host="0.0.0.0")
+    app.run(debug=False, host="0.0.0.0")
