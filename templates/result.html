@@ -65,7 +65,7 @@
 <body>
     <div class="container">
         <h2 class="my-4"><center id="tahun"> </center></h2>
-        <button id="btnDownloadPDF" class="btn btn-primary"><i class="fa fa-download" style="font-size: 20px;"></i>Download</button>
+        <button id="btnDownloadPDF" class="btn btn-primary"><i class="fa fa-download" style="font-size: 20px;"></i>Download PDF</button>
         <div class="table-responsive">
             <table class="table table-bordered table-hover">
                 <tbody>
@@ -174,7 +174,7 @@
                     var blob = new Blob([this.response], { type: "pdf" });
                     var link = document.createElement("a");
                     link.href = window.URL.createObjectURL(blob);
-                    link.download = "Hasil Rekomendasi.pdf";
+                    link.download = "Hasil_Rekomendasi.pdf";
                     link.click();
                 }
             };
