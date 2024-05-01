@@ -71,7 +71,7 @@
       background-color: #f1f1f1;
     }
     #proses {
-  width: 525px;
+  width: 139px;
   height: 45px;
   left: 457px;
   top: 422px;
@@ -96,12 +96,9 @@
     color:#fff;
 
 
-    }
-    
-   
+    }  
   </style>
 </head>
-
 <body>
   <div class="container">
     <div class="row justify-content-center">
@@ -112,7 +109,7 @@
             <h2 class="title d-inline ml-2 text">Rekomendasi Calon Mahasiswa Jalur PMDK</h2>
           </div>
           <center>
-            <form action="/upload" method="post" enctype="multipart/form-data" id="myForm">
+            <form action="/predict" method="post" enctype="multipart/form-data" id="myForm">
               <div id="drop_zone" ondrop="handleDrop(event)" ondragover="handleDragOver(event)">
                 <i class="fa fa-cloud-upload" style="font-size: 25px;"></i>
                 <!-- <i class="fa fa-cloud-upload" aria-hidden="true" style="color: #007bff; font-size: 60px;"></i> -->
@@ -129,9 +126,9 @@
               </div>
               <br><br>
               <center>
+                <button type="button" id="cancel" onclick="resetForm()"><i class="fa fa-refresh" style="font-size: 20px;"></i> Reset</button>
                 <button type="submit" id="proses"  onclick="processData()">Proses Data</button></center>
-            <br>
-            <button type="button" id="cancel" onclick="resetForm()">Cancel</button>
+            
               </form>
           </center>
         
