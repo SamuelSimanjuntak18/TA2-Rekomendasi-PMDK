@@ -23,11 +23,9 @@
             text-align: left;
             padding: 8px;
         }
-
         tr:nth-child(even) {
             background-color: #dddddd;
         }
-
         .pagination {
             margin-top: 20px;
             float: right;
@@ -73,6 +71,7 @@
                 </tbody>
             </table>
         </div>
+        
         <div class="pagination"></div>
         <button id="btnback">Back</button>      
     </div>
@@ -83,7 +82,7 @@
 
     // Dapatkan elemen dengan ID "tahun"
     var elemenTahun = document.getElementById("tahun");
-    elemenTahun.innerText = "Hasil Rekomendasi Calon Mahasiswa Tahun " + tahunSaatIni;
+    elemenTahun.innerText = "Hasil Rekomendasi Calon Mahasiswa Jalur PMDK Tahun " + tahunSaatIni;
 
     document.addEventListener("DOMContentLoaded", function() {
         var rows = document.querySelectorAll("tbody tr");

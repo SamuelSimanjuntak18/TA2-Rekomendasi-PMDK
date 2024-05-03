@@ -1,0 +1,85 @@
+from flask import Flask, render_template, request, jsonify
+import pandas as pd
+import joblib
+
+app = Flask(__name__)
+
+# Load model yang telah dilatih
+model = joblib.load('D:\\SEMESTER7&8\\TA1\\Referensi\\TRIAL\\TA2-Rekomendasi-PMDK\\Model\\ModelTA.pkl')
+
+# Definisi pilihan program studi
+program_studi = {
+    'DIII Teknologi Informasi': 1,
+    'DIII Teknologi Komputer': 2,
+    'DIV Teknologi Rekayasa Perangkat Lunak': 3,
+    'S1 Teknik Informatika': 4,
+    'S1 Manajemen Rekayasa': 5,
+    'S1 Sistem Informasi': 6,
+    'S1 Teknik Bioproses': 7,
+    'S1 Teknik Elektro': 8
+}
+
+@app.route('/')
+def upload_file():
+    return render_template('index.html')
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    try:
+        file = request.files['file']
+        if not file:
+            return "No file uploaded"
+
+        # Baca file Excel yang diunggah
+        data_df = pd.read_excel(file)
+
+        # Tambahkan kolom "Nama" dengan nilai default kosong jika tidak ada
+        if 'Nama' not in data_df.columns:
+            data_df['Nama'] = ''
+            show_nama = False
+        else:
+            show_nama = True
+
+        # Tambahkan kolom "Nomor" berisi nomor urut jika belum ada
+        if 'Nomor' not in data_df.columns:
+            data_df.insert(0, 'Nomor', range(1, len(data_df) + 1))
+
+        # Mengganti nilai string program studi dengan nilai numerik menggunakan peta program studi
+        data_df['Pilihan 1'] = data_df['Pilihan 1'].map(program_studi)
+        data_df['Pilihan 2'] = data_df['Pilihan 2'].map(program_studi)
+        data_df['Pilihan 3'] = data_df['Pilihan 3'].map(program_studi)
+
+        # Prediksi pada data yang diunggah
+        predictions = model.predict(data_df.drop(columns=['Nama', 'Nomor']))  # Drop kolom 'Nama' dan 'Nomor' sebelum membuat prediksi
+        probabilities = model.predict_proba(data_df.drop(columns=['Nama', 'Nomor']))
+
+        # Data Frame untuk Prediksi Kelulusan
+        result_df = pd.DataFrame({
+            'Nomor': data_df['Nomor'],
+            'Nama': data_df['Nama'] if 'Nama' in data_df.columns else None,  # Sertakan kolom "Nama" jika ada
+        })
+
+        for i in range(len(predictions)):
+            if predictions[i] == 1:
+                result_df.loc[i, 'Pilihan 1'] = f"Lulus (Prob: {probabilities[i][1]:.10f})"
+                result_df.loc[i, 'Pilihan 2'] = f"Tidak Lulus (Prob: {probabilities[i][0]:.10f})"
+                result_df.loc[i, 'Pilihan 3'] = f"Tidak Lulus (Prob: {probabilities[i][0]:.10f})"
+            else:
+                result_df.loc[i, 'Pilihan 1'] = f"Tidak Lulus (Prob: {probabilities[i][0]:.10f})"
+                result_df.loc[i, 'Pilihan 2'] = f"Tidak Lulus (Prob: {probabilities[i][0]:.10f})"
+                result_df.loc[i, 'Pilihan 3'] = f"Tidak Lulus (Prob: {probabilities[i][0]:.10f})"
+
+        if not show_nama:
+            result_df = result_df.drop(columns=['Nama'])
+
+        # Konversi hasil prediksi ke dalam format HTML
+        html_output = result_df.to_html(index=False)
+
+        # Render template result.html dan kirimkan data hasil rekomendasi
+        return render_template('result.html', result=html_output)
+
+    except Exception as e:
+        return str(e)
+
+if __name__ == '__main__':
+    app.run(debug=True)

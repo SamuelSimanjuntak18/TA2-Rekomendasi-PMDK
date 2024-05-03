@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <title>Sistem Rekomendasi PMDK</title>
   <style>
     body {
@@ -25,10 +25,6 @@
       box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
     }
 
-    .progress-container {
-      display: none;
-    }
-
     .btn {
       transition: all 0.3s ease;
     }
@@ -38,10 +34,10 @@
     }
 
     .logo {
-    width: 79px;
-    height: 82px;
-    left: 100px;
-    top: 145px;
+      width: 79px;
+      height: 82px;
+      left: 100px;
+      top: 145px;
     }
 
     .title {
@@ -70,35 +66,44 @@
     #drop_zone.hover {
       background-color: #f1f1f1;
     }
+
     #proses {
-  width: 525px;
-  height: 45px;
-  left: 457px;
-  top: 422px;
-  background: #0479C0;
-  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.25);
-  border-radius: 6px;
-  color:#fff;
+      width: 139px;
+      height: 45px;
+      background: #0479C0;
+      border-radius: 6px;
+      color: #fff;
     }
+
     #cancel {
-    width: 139px;
-    height: 45px;
-    left: 650px;
-    top: 489px;
-
+      width: 139px;
+      height: 45px;
+      border-radius: 6px;
+      margin-right: 10%;
     }
+
     #choose {
-    background: #0479C0;
-    width: 139px;
-    height: 30px;
-    left: 643px;
-    top: 313px;
-    color:#fff;
-
-
+      background: #0479C0;
+      width: 139px;
+      height: 30px;
+      color: #fff;
+      margin-top: 10px;
+      text-align: center;
     }
-    
-   
+    .swal-button-black {
+      color: black !important;
+    }
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    .rotate {
+      animation: spin 1s linear infinite;
+    }
   </style>
 </head>
 
@@ -112,29 +117,23 @@
             <h2 class="title d-inline ml-2 text">Rekomendasi Calon Mahasiswa Jalur PMDK</h2>
           </div>
           <center>
-            <form action="/upload" method="post" enctype="multipart/form-data" id="myForm">
+            <form action="/predict" method="post" enctype="multipart/form-data" id="myForm">
               <div id="drop_zone" ondrop="handleDrop(event)" ondragover="handleDragOver(event)">
                 <i class="fa fa-cloud-upload" style="font-size: 25px;"></i>
-                <!-- <i class="fa fa-cloud-upload" aria-hidden="true" style="color: #007bff; font-size: 60px;"></i> -->
                 <p class="upload-label">Drag and drop file here, or</p>
                 <input type="file" id="file" name="file" accept=".xls, .xlsx , .csv" style="display: none;" required>
                 <label for="file" id="choose">Choose File</label>
               </div>
-              <div id="error-message" style="color: red; display: none; text-align: left;"><i>Tidak ada file yang dipilih, Silahkan Pilih file</i></div>
-              <div class="progress-container">
-                <div class="progress">
-                  <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                    aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
-                </div>
-              </div>
+              <div id="error-message" style="color: red; display: none; text-align: left;"><i>Tidak ada file yang
+                  dipilih, Silahkan Pilih file</i></div>
               <br><br>
               <center>
-                <button type="submit" id="proses"  onclick="processData()">Proses Data</button></center>
-            <br>
-            <button type="button" id="cancel" onclick="resetForm()">Cancel</button>
-              </form>
+                <button type="button" id="cancel" onclick="resetForm()"><i id="resetIcon" class="fa fa-refresh"
+                    style="font-size: 20px;"></i> Reset</button>
+                <button type="button" id="proses" onclick="processData()">Proses Data</button>
+              </center>
+            </form>
           </center>
-        
           <div id="success-message" style="color: green; display: none;">Proses data berhasil.</div>
           <div id="file-name" style="color: #007bff; display: none;"></div>
         </div>
@@ -144,34 +143,17 @@
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     function resetForm() {
-      document.getElementById("myForm").reset();
-      document.getElementById("file-name").style.display = "none";
-    }
+      var resetIcon = document.getElementById("resetIcon");
+      resetIcon.classList.add("rotate"); // Menambahkan kelas rotate ke ikon
 
-    function processData() {
-      var fileInput = document.getElementById("file");
-      if (!fileInput.value) {
-        document.getElementById("error-message").style.display = "block";
-        return false;
-      } else {
-        document.getElementById("error-message").style.display = "none";
-      }
-      var progressBar = document.querySelector('.progress-bar');
-      var progressContainer = document.querySelector('.progress-container');
-      progressContainer.style.display = 'block';
-
-      var width = 1;
-      var interval = setInterval(function () {
-        if (width >= 100) {
-          clearInterval(interval);
-          document.getElementById("success-message").style.display = "block";
-        } else {
-          width++;
-          progressBar.style.width = width + '%';
-        }
-      }, 50);
+      setTimeout(function () {
+        resetIcon.classList.remove("rotate"); // Menghapus kelas rotate setelah 1 detik
+        document.getElementById("myForm").reset();
+        document.getElementById("file-name").style.display = "none";
+      }, 1000);
     }
 
     function handleDragOver(event) {
@@ -193,13 +175,46 @@
       document.getElementById("file-name").style.display = "block";
     }
 
-    // Function untuk menampilkan nama file saat dipilih menggunakan tombol "Choose File"
-    document.getElementById("file").addEventListener("change", function() {
+    // Function to display file name when selected using the "Choose File" button
+    document.getElementById("file").addEventListener("change", function () {
       var fileName = this.files[0].name;
       document.getElementById("file-name").innerText = " " + fileName;
       document.getElementById("file-name").style.display = "block";
     });
+
+    function processData() {
+      var fileInput = document.getElementById("file");
+      if (!fileInput.value) {
+        Swal.fire({
+          icon: 'error',
+          title: 'File masih kosong',
+          text: 'Silakan pilih file terlebih dahulu!',
+        });
+        return;
+      }
+      confirmProcess();
+    }
+
+    function confirmProcess() {
+      Swal.fire({
+        // title: 'Apakah Anda Yakin?',
+        text: "Apakah data sudah sesuai?",
+        // icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#0479C0',
+        cancelButtonColor: '#F0F0F0',
+        cancelButtonText: 'Tidak',
+        confirmButtonText: 'Ya',
+        customClass: {
+          cancelButton: 'swal-button-black'
+        },
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          document.getElementById("myForm").submit();
+        }
+      });
+    }
   </script>
 </body>
-
 </html>
