@@ -1,12 +1,11 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
 import pandas as pd
 import joblib
+import pdfkit
 
 app = Flask(__name__)
-
 # Load model yang telah dilatih
 model = joblib.load('D:\\SEMESTER7&8\\TA1\\Referensi\\TRIAL\\TA2-Rekomendasi-PMDK\\Model\\ModelTA2.pkl')
-
 # Definisi pilihan program studi
 program_studi = {
     'DIII Teknologi Informasi': 1,
@@ -21,6 +20,7 @@ program_studi = {
 @app.route('/')
 def upload_file():
     return render_template('index.html')
+
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
@@ -68,6 +68,20 @@ def predict():
         return render_template('result.html', result=html_output)
     except Exception as e:
         return str(e)
-
+@app.route('/download_pdf', methods=['POST'])
+def download_pdf():
+    try:
+        html_content = request.form['html_content']
+        # Konversi HTML menjadi PDF menggunakan pdfkit
+        pdfkit.from_string(html_content, 'hasil_rekomendasi.pdf')
+        # Kirimkan file PDF sebagai respons
+        return send_file(
+            'hasil_rekomendasi.pdf',
+            mimetype='application/pdf',
+            attachment_filename='hasil_rekomendasi.pdf',
+            as_attachment=True
+        )
+    except Exception as e:
+        return str(e)
 if __name__ == '__main__':
     app.run(debug=True)
